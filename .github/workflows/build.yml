@@ -1,0 +1,37 @@
+name: Rust Build
+
+on:
+  workflow_dispatch: # Manually run the workflow from the Actions tab
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+        include:
+          - os: macos-latest
+            target: x86_64-apple-darwin
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true # Install the toolchain even if it's already installed
+          target: ${{ matrix.target }}
+        # fetch-depth: 0 # 推荐用于获取 Git 历史以便正确计算版本信息
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }} --bin hello-actions # 替换为你的项目的二进制文件名
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3 # https://github.com/actions/upload-artifact
+        with:
+          name: my-project-binary[${{ matrix.target }}]
+          path: target/${{ matrix.target }}/release/ # Upload the release binary directory
