@@ -1,6 +1,9 @@
 # action 名称
 name: Release
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
